@@ -1,0 +1,21 @@
+# Виртуальное окружение
+venv/
+env/
+.venv/
+
+# Кэш Python
+__pycache__/
+*.pyc
+
+# База данных (если используете SQLite)
+db.sqlite3
+
+# Файлы с локальными настройками и секретами
+.env
+local_settings.py
+settings.py
+
+# Статические файлы (они собираются отдельно)
+staticfiles/
+static/
+media/

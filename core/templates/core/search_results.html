@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+
+{% block title %}Результаты поиска{% endblock %}
+
+{% block content %}
+<div class="news-container">
+    <h2 class="news-title">
+        Результаты поиска
+        {% if search_query %}
+            по запросу: "{{ search_query }}"
+        {% endif %}
+        {% if search_date %}
+            за дату: {{ search_date }}
+        {% endif %}
+    </h2>
+    
+    {% if news %}
+        <div class="news-grid">
+            {% for item in news %}
+                <div class="news-card">
+                    <div class="news-card-header">
+                        <span class="news-channel">{{ item.channel.short_title|default:item.channel.title|truncatechars:40 }}</span>
+                        <span class="news-date">{{ item.pubDate|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    <h3 class="news-card-title">
+                        <a href="{{ item.link }}" target="_blank">{{ item.title|truncatechars:100 }}</a>
+                    </h3>
+                    <div class="news-card-description">
+                        {{ item.description|striptags|truncatewords:50 }}
+                    </div>
+                    <div class="news-card-footer">
+                        <a href="{{ item.link }}" target="_blank" class="read-more">Читать далее →</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-news">
+            <p>По вашему запросу ничего не найдено</p>
+            <p><a href="/">Вернуться на главную</a></p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
