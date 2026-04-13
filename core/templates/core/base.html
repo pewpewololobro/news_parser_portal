@@ -3,6 +3,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/pagination.css' %}">
     <link rel="shortcut icon" type="image/png" href="">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>{% block title %}{% endblock title %}</title>
@@ -34,8 +35,8 @@
             {% endfor %}
         </ul>
         <form action="{% url 'search_news' %}" class="form-filter" method="GET">
-            <input type="text" name="q" id="filter_n" class="filter_news_header" placeholder="Поиск по новостям">
-            <input type="date" name="date" id="filter_date" class="filter_news_date" placeholder="Выберите дату">
+            <input type="text" name="q" id="filter_n" class="filter_news_header" placeholder="Поиск по новостям" value="{{ search_query|default:'' }}">
+            <input type="date" name="date" id="filter_date" class="filter_news_date" placeholder="Выберите дату" value="{{ search_date|default:'' }}">
             <button type="submit" class="button">
                 <i class="fas fa-search"></i>
             </button>
@@ -45,7 +46,15 @@
     <main>
         {% block content %}
         {% endblock content %}
+        
+        {# Пагинация и выбор количества новостей #}
+        {% if news %}
+            <div class="pagination-wrapper">
+                {% include 'core/pagination.html' %}
+            </div>
+        {% endif %}
     </main>
+    
     <footer class="footer">
         ПОДВАЛ
         {% block script %}

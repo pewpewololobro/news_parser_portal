@@ -1,0 +1,82 @@
+{% load static %}
+
+{% if news.has_other_pages or per_page %}
+<div class="pagination-container">
+    {% if per_page %}
+    <div class="per-page-control">
+        <label for="per-page-select">Новостей на странице:</label>
+        <select id="per-page-select" class="per-page-select" onchange="changePerPage(this.value)">
+            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+            <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+            <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+        </select>
+    </div>
+    {% endif %}
+    
+    {% if news.has_other_pages %}
+    <ul class="pagination">
+        {% if news.has_previous %}
+            <li>
+                <a href="?page={{ news.previous_page_number }}{% if current_params %}&{{ current_params }}{% endif %}" aria-label="Previous">
+                    <i class="fas fa-chevron-left"></i> Назад
+                </a>
+            </li>
+        {% else %}
+            <li class="disabled">
+                <span><i class="fas fa-chevron-left"></i> Назад</span>
+            </li>
+        {% endif %}
+        
+        {% for i in news.paginator.page_range %}
+            {% if news.number == i %}
+                <li class="active">
+                    <span>{{ i }}</span>
+                </li>
+            {% elif i > news.number|add:'-5' and i < news.number|add:'5' %}
+                <li>
+                    <a href="?page={{ i }}{% if current_params %}&{{ current_params }}{% endif %}">{{ i }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if news.has_next %}
+            <li>
+                <a href="?page={{ news.next_page_number }}{% if current_params %}&{{ current_params }}{% endif %}" aria-label="Next">
+                    Вперед <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="disabled">
+                <span>Вперед <i class="fas fa-chevron-right"></i></span>
+            </li>
+        {% endif %}
+    </ul>
+    
+    <div class="pagination-info">
+        <i class="fas fa-newspaper"></i> Страница {{ news.number }} из {{ news.paginator.num_pages }} 
+        | Всего новостей: {{ news.paginator.count }}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function changePerPage(value) {
+    var currentUrl = window.location.href;
+    var url = new URL(currentUrl);
+    url.searchParams.set('per_page', value);
+    url.searchParams.delete('page'); // Сбрасываем на первую страницу
+    window.location.href = url.toString();
+}
+
+// Сохраняем параметры поиска при изменении количества новостей
+document.addEventListener('DOMContentLoaded', function() {
+    var perPageSelect = document.getElementById('per-page-select');
+    if (perPageSelect) {
+        perPageSelect.addEventListener('change', function() {
+            changePerPage(this.value);
+        });
+    }
+});
+</script>
+{% endif %}
