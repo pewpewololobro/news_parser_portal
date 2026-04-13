@@ -3,6 +3,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from datetime import datetime
 from .models import Group, Channel, Item
+from datetime import datetime, timedelta
+
 
 
 def index(request):
@@ -111,7 +113,6 @@ def channel_news(request, channel_id):
     }
     return render(request, 'core/channel_news.html', context)
 
-
 def search_news(request):
     groups = Group.objects.filter(groupchannel__isnull=False).distinct().order_by('sort')
     query = request.GET.get('q', '')
@@ -124,8 +125,16 @@ def search_news(request):
     
     if date_filter:
         try:
+            # Парсим дату из запроса
             date_obj = datetime.strptime(date_filter, '%Y-%m-%d').date()
-            news_list = news_list.filter(pubDate__date=date_obj)
+            
+            # Создаем диапазон: от начала дня до конца дня
+            start_date = datetime.combine(date_obj, datetime.min.time())
+            end_date = datetime.combine(date_obj, datetime.max.time())
+            
+            # Фильтруем по диапазону
+            news_list = news_list.filter(pubDate__range=(start_date, end_date))
+            
         except ValueError:
             pass
     
@@ -159,3 +168,51 @@ def search_news(request):
         'current_params': params_string,
     }
     return render(request, 'core/search_results.html', context)
+
+# def search_news(request):
+#     groups = Group.objects.filter(groupchannel__isnull=False).distinct().order_by('sort')
+#     query = request.GET.get('q', '')
+#     date_filter = request.GET.get('date', '')
+    
+#     news_list = Item.objects.select_related('channel')
+    
+#     if query:
+#         news_list = news_list.filter(Q(title__icontains=query) | Q(description__icontains=query))
+    
+#     if date_filter:
+#         try:
+#             date_obj = datetime.strptime(date_filter, '%Y-%m-%d').date()
+#             news_list = news_list.filter(pubDate__date=date_obj)
+#         except ValueError:
+#             pass
+    
+#     news_list = news_list.order_by('-pubDate')
+    
+#     # Получаем параметр per_page из GET
+#     per_page = request.GET.get('per_page', 20)
+#     try:
+#         per_page = int(per_page)
+#         if per_page not in [10, 20, 50, 100]:
+#             per_page = 20
+#     except:
+#         per_page = 20
+    
+#     paginator = Paginator(news_list, per_page)
+#     page_number = request.GET.get('page', 1)
+#     news = paginator.get_page(page_number)
+    
+#     # Сохраняем параметры для пагинации (исключая page)
+#     params = request.GET.copy()
+#     if 'page' in params:
+#         del params['page']
+#     params_string = params.urlencode()
+    
+#     context = {
+#         'groups': groups,
+#         'news': news,
+#         'search_query': query,
+#         'search_date': date_filter,
+#         'per_page': per_page,
+#         'current_params': params_string,
+#     }
+#     return render(request, 'core/search_results.html', context)
