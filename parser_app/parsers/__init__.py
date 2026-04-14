@@ -1,13 +1,13 @@
 from urllib.parse import urlparse
 import re
+from bs4 import BeautifulSoup
 from .base import RSSParser, HTMLParser
-from .site_parsers import PARSER_MAP, GenericHTMLParser
+from .site_parsers import PARSER_MAP, GenericHTMLParser, RenTvParser
 
 def get_parser(channel):
     """
     Возвращает подходящий парсер для канала
     """
-    # Сначала проверяем html_desc, если он пустой или '-', используем link
     url = channel.html_desc
     if not url or url == '-' or url.strip() == '':
         url = channel.link
@@ -15,26 +15,40 @@ def get_parser(channel):
             raise Exception(f"URL канала '{channel.short_title}' не указан ни в html_desc, ни в link")
     
     # Проверяем наличие RSS ленты
-    rss_indicators = ['.rss', '.xml', '/rss', '/feed', 'rss.xml', 'rss.php', 'feed.xml']
+    rss_indicators = ['.rss', '.xml', '/rss', '/feed', 'rss.xml', 'rss.php', 'feed.xml', '/atom']
     if any(indicator in url.lower() for indicator in rss_indicators):
         try:
-            return RSSParser(channel, url)  # Передаем URL в парсер
+            return RSSParser(channel, url)
         except:
-            # Если RSS не работает, пробуем HTML
             pass
+    
+    # Определяем CMS по мета-тегам (если возможно)
+    try:
+        import requests
+        response = requests.get(url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        generator = soup.find('meta', {'name': 'generator'})
+        if generator:
+            generator_content = generator.get('content', '').lower()
+            if 'wordpress' in generator_content:
+                from .site_parsers import WordPressParser
+                return WordPressParser(channel, url)
+            elif 'drupal' in generator_content:
+                from .site_parsers import DrupalParser
+                return DrupalParser(channel, url)
+    except:
+        pass
     
     # Ищем парсер для конкретного домена
     parsed_url = urlparse(url)
     domain = parsed_url.netloc.lower()
     
-    # Убираем www и поддомены
     domain = re.sub(r'^www\.', '', domain)
-    domain = re.sub(r'^xn--80aaac0ct\.', '', domain)  # Специально для абакан.рф
+    domain = re.sub(r'^xn--80aaac0ct\.', '', domain)
     
-    # Пробуем найти точное совпадение
     for site_domain, parser_class in PARSER_MAP.items():
         if site_domain in domain or domain in site_domain:
-            return parser_class(channel, url)  # Передаем URL в парсер
+            return parser_class(channel, url)
     
-    # Если парсер не найден, используем универсальный HTML парсер
-    return GenericHTMLParser(channel, url)  # Передаем URL в парсер
+    return GenericHTMLParser(channel, url)
