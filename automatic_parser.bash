@@ -1,0 +1,1 @@
+0 6,12,18 * * * cd "путь до скрипта" && python manage.py parse_news --days 2 >> /var/log/news_parser.log 2>&1
