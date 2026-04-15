@@ -148,77 +148,89 @@ class BaseParser:
     def save_item(self, title, link, pub_date, description, full_text=''):
         """Сохраняет новость с полным текстом"""
         if not title or not link:
+            print(f"    save_item: пропущено - нет заголовка или ссылки")
             return False
         
+        # Проверяем существование новости
         if Item.objects.filter(link=link).exists():
+            print(f"    save_item: новость уже существует")
             return False
         
+        print(f"    save_item: получена дата '{pub_date}'")
+        
+        # Парсим дату
         parsed_date = None
         if pub_date:
             parsed_date = self.parse_date(pub_date)
+            if parsed_date:
+                print(f"    save_item: дата распаршена в {parsed_date}")
+            else:
+                print(f"    save_item: НЕ УДАЛОСЬ распарсить дату '{pub_date}'")
         
+        # Если дата не распарсилась, используем текущую
         if not parsed_date:
             parsed_date = dj_timezone.now()
+            print(f"    save_item: используем ТЕКУЩУЮ дату {parsed_date}")
         
-        if not full_text and description:
-            full_text = description
-        
-        if not full_text and link:
-            try:
-                full_text = self.extract_article_text(link)
-            except:
-                full_text = ''
-        
+        # Создаем новость
         try:
-            Item.objects.create(
+            item = Item.objects.create(
                 title=title[:500],
                 link=link,
                 pubDate=parsed_date,
                 description=full_text[:5000] if full_text else (description[:5000] if description else ''),
                 channel=self.channel
             )
+            print(f"    save_item: сохранено с датой {item.pubDate}")
             return True
         except Exception as e:
-            print(f"Ошибка сохранения новости: {e}")
+            print(f"    save_item: ошибка сохранения {e}")
             return False
     
     def parse_date(self, date_string):
-        """Улучшенный парсинг дат"""
+        """Пытается распарсить дату из разных форматов"""
         if not date_string:
+            print(f"      parse_date: пустая дата")
             return None
         
+        print(f"      parse_date: пробуем распарсить '{date_string}'")
+        
+        # Замена русских месяцев на английские
+        months_ru_en = {
+            'января': 'January', 'февраля': 'February', 'марта': 'March',
+            'апреля': 'April', 'мая': 'May', 'июня': 'June',
+            'июля': 'July', 'августа': 'August', 'сентября': 'September',
+            'октября': 'October', 'ноября': 'November', 'декабря': 'December'
+        }
+        
+        date_eng = date_string
+        for ru, en in months_ru_en.items():
+            if ru in date_eng.lower():
+                date_eng = date_eng.lower().replace(ru, en)
+                print(f"      parse_date: заменили {ru} на {en} -> '{date_eng}'")
+                break
+        
+        # Форматы дат
         date_formats = [
-            '%a, %d %b %Y %H:%M:%S %z',
-            '%a, %d %b %Y %H:%M:%S %Z',
-            '%a, %d %b %Y %H:%M:%S',
-            '%Y-%m-%dT%H:%M:%S%z',
-            '%Y-%m-%dT%H:%M:%SZ',
-            '%Y-%m-%dT%H:%M:%S',
-            '%Y-%m-%d %H:%M:%S',
+            '%d %B %Y',      # 15 April 2026
+            '%d.%m.%Y',      # 15.04.2026
+            '%Y-%m-%d',      # 2026-04-15
             '%d.%m.%Y %H:%M',
-            '%d.%m.%Y %H:%M:%S',
-            '%d.%m.%Y',
-            '%Y-%m-%d',
-            '%d/%m/%Y %H:%M',
-            '%d/%m/%Y',
-            '%b %d, %Y',
-            '%B %d, %Y',
-            '%d %B %Y',
+            '%Y-%m-%d %H:%M:%S',
             '%d %b %Y',
         ]
         
-        date_string = date_string.strip()
-        date_string = re.sub(r'\([^)]*\)', '', date_string).strip()
-        
         for fmt in date_formats:
             try:
-                dt = datetime.strptime(date_string, fmt)
+                dt = datetime.strptime(date_eng.strip(), fmt)
                 if dt.tzinfo is None:
                     dt = pytz.timezone('Asia/Krasnoyarsk').localize(dt)
+                print(f"      parse_date: успешно распаршено как '{fmt}' -> {dt}")
                 return dt
             except:
                 continue
         
+        print(f"      parse_date: НЕ УДАЛОСЬ распарсить '{date_string}'")
         return None
 
 
@@ -313,3 +325,5 @@ class HTMLParser(BaseParser):
             return added_count
         except Exception as e:
             raise Exception(f"HTML parsing failed: {str(e)}")
+    
+    
