@@ -10,6 +10,13 @@ from .rusinfo_parser import RusinfoParser
 from .mk_parser import MkParser
 from .rus19_parser import Rus19Parser
 from .onf_parser import OnfParser
+from .r19_parser import R19Parser
+from .r19_journal_parser import R19JournalParser
+from .abakan_ru_parser import AbakanRuParser
+from .shansonline_parser import ShansonlineParser, ShansonlineHTMLParser    
+from .sledcom_parser import SledcomParser
+from .nalog_parser import NalogParser
+from .sfr_parser import SfrParser
 
 # Словарь парсеров для конкретных доменов
 PARSER_MAP = {
@@ -25,6 +32,19 @@ PARSER_MAP = {
     'www.19rus.ru': Rus19Parser,
     'onf.ru': OnfParser,
     'www.onf.ru': OnfParser,
+    'r-19.ru': R19Parser,
+    'www.r-19.ru': R19Parser,
+    'r19.ru/journal/news': R19JournalParser,
+    'r19.ru': R19JournalParser,
+    'abakan.ru': AbakanRuParser,
+    'www.abakan.ru': AbakanRuParser,
+    'shansonline.ru': ShansonlineParser, 
+    'sledcom.ru': SledcomParser,
+    'krk.sledcom.ru': SledcomParser,
+    'nalog.gov.ru': NalogParser,
+    'www.nalog.gov.ru': NalogParser,
+    'sfr.gov.ru': SfrParser,
+    'www.sfr.gov.ru': SfrParser,
 }
 
 def get_parser(channel):
@@ -55,7 +75,17 @@ def get_parser(channel):
     
     print(f"  URL: {url}")
     
-    # Проверяем RSS
+    # Определяем домен для специальной обработки
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc.lower()
+    domain = re.sub(r'^www\.', '', domain)
+    
+    # Специальная обработка для следкома (ДО проверки RSS)
+    if 'sledcom.ru' in domain:
+        print(f"  Используем специальный парсер: SledcomParser")
+        return SledcomParser(channel, url)
+    
+    # Проверяем RSS для остальных сайтов
     rss_indicators = ['.rss', '.xml', '/rss', '/feed', 'rss.xml']
     if any(indicator in url.lower() for indicator in rss_indicators):
         try:
@@ -63,11 +93,7 @@ def get_parser(channel):
         except:
             pass
     
-    # Определяем домен и ищем парсер
-    parsed_url = urlparse(url)
-    domain = parsed_url.netloc.lower()
-    domain = re.sub(r'^www\.', '', domain)
-    
+    # Ищем парсер в словаре
     for site_domain, parser_class in PARSER_MAP.items():
         if site_domain in domain or domain in site_domain:
             print(f"  Используем парсер: {parser_class.__name__}")
