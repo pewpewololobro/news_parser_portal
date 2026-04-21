@@ -26,3 +26,6 @@ settings.py
 staticfiles/
 static/
 media/
+
+# Дебаг файлы
+debug_*.html
