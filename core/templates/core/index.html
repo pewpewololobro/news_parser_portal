@@ -12,7 +12,7 @@
             <div class="news-card">
                 <div class="news-card-header">
                     <span class="news-channel">{{ item.channel.short_title|default:item.channel.title|truncatechars:40 }}</span>
-                    <span class="news-date">{{ item.pubDate|date:"d.m.Y H:i" }}</span>
+                    <span class="news-date">{{ item.pubDate|date:"d.m.Y" }}</span>
                 </div>
                 <h3 class="news-card-title">
                     <a href="{{ item.link }}" target="_blank">{{ item.title|truncatechars:100 }}</a>

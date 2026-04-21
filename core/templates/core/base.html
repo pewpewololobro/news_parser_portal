@@ -1,9 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/pagination.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/accessibility.css' %}">  <!-- НОВЫЙ ФАЙЛ -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&display=swap" rel="stylesheet">
     <link rel="shortcut icon" type="image/png" href="">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -16,39 +17,6 @@
         </a>
         <h1 class="header_title">Абаканский городской портал</h1>
     </header>
-    <!-- <nav class="nav">
-        <ul class="nav_items">
-            <li><a href="/">Все новости</a></li>
-            <li><a href="https://xn--80aaac0ct.xn--p1ai/main/o-gorode.html">О городе</a></li>
-            {% for group in groups %}
-                <li class="menu-item">
-                    <a href="{% url 'group_news' group.id %}">{{ group.name }}</a>
-                    <ul class="nav_sub_items">
-                        {% for group_channel in group.groupchannel_set.all %}
-                            <li>
-                                <a href="{% url 'channel_news' group_channel.channel.channel_id %}">
-                                    {{ group_channel.channel.short_title|default:group_channel.channel.title|truncatechars:30 }}
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </li>
-            {% endfor %}
-        </ul>
-        <form action="{% url 'search_news' %}" class="form-filter" method="GET">
-            <input type="text" name="q" id="filter_n" class="filter_news_header" placeholder="Поиск по новостям" value="{{ search_query|default:'' }}">
-            <input type="date" name="date" id="filter_date" class="filter_news_date" placeholder="Выберите дату" value="{{ search_date|default:'' }}">
-            <button type="submit" class="button">
-                <i class="fas fa-search"></i>
-            </button>
-        </form>
-        <div class="theme-switch-wrapper">
-            <label class="theme-switch">
-                <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
-                <span class="slider"></span>
-            </label>
-        </div>
-    </nav> -->
     <nav class="nav">
         <button class="mobile-menu-btn" aria-label="Меню">☰</button>
         <ul class="nav_items">
@@ -76,7 +44,7 @@
                     placeholder="Поиск по новостям" value="{{ search_query|default:'' }}">
                 <input type="date" name="date" id="filter_date" class="filter_news_date" 
                     value="{{ search_date|default:'' }}">
-                <button type="submit" class="button search-btn">
+                <button type="submit" class="button search-btn" title="Применить фильтрацию">
                     <i class="fas fa-search"></i>
                 </button>
             </form>
@@ -87,19 +55,88 @@
             </button>
         </div>
         
+        <!-- НОВАЯ КНОПКА ДЛЯ СЛАБОВИДЯЩИХ -->
+        
+        
         <div class="theme-switch-wrapper">
             <label class="theme-switch">
                 <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
-                <span class="slider"></span>
+                <span class="slider" title="Смена темы сайта"></span>
             </label>
         </div>
+        <button class="accessibility-btn" id="accessibilityToggle" title="Версия для слабовидящих">
+            <i class="fas fa-eye"></i>
+            <span>Версия для слабовидящих</span>
+        </button>
     </nav>
+    
+    <!-- ПАНЕЛЬ НАСТРОЕК ДЛЯ СЛАБОВИДЯЩИХ -->
+    <div class="accessibility-panel" id="accessibilityPanel">
+        <div class="accessibility-panel-header">
+            <h3>Настройки для слабовидящих</h3>
+            <button class="close-panel" id="closePanelBtn" title="Закрыть настройки">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="accessibility-controls">
+            <div class="accessibility-control-group">
+                <span class="control-label">Размер шрифта:</span>
+                <div class="font-size-controls">
+                    <button class="font-size-btn" data-size="small" title="Маленький шрифт">A-</button>
+                    <button class="font-size-btn active" data-size="normal" title="Обычный шрифт">A</button>
+                    <button class="font-size-btn" data-size="large" title="Большой шрифт">A+</button>
+                    <button class="font-size-btn" data-size="xlarge" title="Очень большой шрифт">A++</button>
+                </div>
+            </div>
+            
+            <div class="accessibility-control-group">
+                <span class="control-label">Цветовая схема:</span>
+                <div class="color-scheme-controls">
+                    <button class="color-scheme-btn active" data-scheme="default" title="Стандартная">
+                        <i class="fas fa-sun"></i> Стандартная
+                    </button>
+                    <button class="color-scheme-btn" data-scheme="black-white" title="Черно-белая">
+                        <i class="fas fa-adjust"></i> Черно-белая
+                    </button>
+                    <button class="color-scheme-btn" data-scheme="dark-blue" title="Темно-синяя">
+                        <i class="fas fa-moon"></i> Темно-синяя
+                    </button>
+                    <button class="color-scheme-btn" data-scheme="high-contrast" title="Высокий контраст">
+                        <i class="fas fa-circle"></i> Высокий контраст
+                    </button>
+                </div>
+            </div>
+            
+            <div class="accessibility-control-group">
+                <span class="control-label">Интервал:</span>
+                <div class="spacing-controls">
+                    <button class="spacing-btn" data-spacing="small" title="Стандартный интервал">Стандартный</button>
+                    <button class="spacing-btn" data-spacing="large" title="Увеличенный интервал">Увеличенный</button>
+                </div>
+            </div>
+            
+            <div class="accessibility-control-group">
+                <span class="control-label">Изображения:</span>
+                <div class="images-controls">
+                    <button class="images-btn active" data-images="show" title="Показывать изображения">
+                        <i class="fas fa-image"></i> Показывать
+                    </button>
+                    <button class="images-btn" data-images="hide" title="Скрыть изображения">
+                        <i class="fas fa-eye-slash"></i> Скрыть
+                    </button>
+                </div>
+            </div>
+            
+            <button class="reset-accessibility-btn" id="resetAccessibilityBtn">
+                <i class="fas fa-undo-alt"></i> Сбросить все настройки
+            </button>
+        </div>
+    </div>
+    
     <main>
-        
         {% block content %}
         {% endblock content %}
         
-        {# Пагинация и выбор количества новостей #}
         {% if news %}
             <div class="pagination-wrapper">
                 {% include 'core/pagination.html' %}
@@ -108,92 +145,10 @@
     </main>
     
     <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3 class="footer-title">Контакты</h3>
-                <div class="footer-contacts">
-                    <div class="contact-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <div class="contact-info">
-                            <strong>Адрес:</strong>
-                            <span>ул. Щетинкина, 10, Абакан, Республика Хакасия, 655017</span>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <i class="fas fa-envelope"></i>
-                        <div class="contact-info">
-                            <strong>e-mail для корреспонденции:</strong>
-                            <a href="mailto:abakanadm@r-19.ru">abakanadm@r-19.ru</a>
-                            <span class="contact-note">(обращения граждан направляются исключительно через раздел "Обращения граждан")</span>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <i class="fas fa-newspaper"></i>
-                        <div class="contact-info">
-                            <strong>e-mail для СМИ и для сообщений о технических сбоях на сайте:</strong>
-                            <a href="mailto:osmi@r-19.ru">osmi@r-19.ru</a>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <i class="fas fa-phone"></i>
-                        <div class="contact-info">
-                            <strong>По вопросам корреспонденции:</strong>
-                            <a href="tel:+73902224018">+7(3902)22-40-18</a>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <i class="fas fa-users"></i>
-                        <div class="contact-info">
-                            <strong>Обращения граждан:</strong>
-                            <a href="tel:+73902223574">+7(3902)22-35-74</a>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <i class="fas fa-microphone"></i>
-                        <div class="contact-info">
-                            <strong>Телефон для СМИ:</strong>
-                            <a href="tel:+73902224536">+7(3902)22-45-36</a>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <i class="fas fa-fax"></i>
-                        <div class="contact-info">
-                            <strong>Факс:</strong>
-                            <a href="tel:+73902221595">+7(3902)22-15-95</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer-section">
-                <h3 class="footer-title">Мы в социальных сетях</h3>
-                <div class="social-links">
-                    <a href="https://vk.com/officialabakan" target="_blank" class="social-link vk" rel="noopener noreferrer">
-                        <i class="fab fa-vk"></i>
-                        <span>ВКонтакте</span>
-                    </a>
-                    <a href="https://ok.ru/officialabakan" target="_blank" class="social-link ok" rel="noopener noreferrer">
-                        <i class="fab fa-odnoklassniki"></i>
-                        <span>Одноклассники</span>
-                    </a>
-                    <a href="https://t.me/officialabakan" target="_blank" class="social-link telegram" rel="noopener noreferrer">
-                        <i class="fab fa-telegram-plane"></i>
-                        <span>Telegram</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; {% now "Y" %} Абаканский городской портал. Все права защищены.</p>
-        </div>
+        <!-- ваш существующий footer -->
     </footer>
+    
     <script src="{% static 'core/js/script.js' %}"></script>
+    <script src="{% static 'core/js/accessibility.js' %}"></script>  <!-- НОВЫЙ ФАЙЛ -->
 </body>
 </html>

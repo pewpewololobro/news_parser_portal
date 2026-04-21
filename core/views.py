@@ -4,12 +4,13 @@ from django.db.models import Q
 from datetime import datetime
 from .models import Group, Channel, Item
 from datetime import datetime, timedelta
+import random
 
 
 
 def index(request):
     groups = Group.objects.filter(groupchannel__isnull=False).distinct().order_by('sort')
-    news_list = Item.objects.select_related('channel').order_by('-pubDate')
+    news_list = Item.objects.select_related('channel').order_by('?')
     
     # Получаем параметр per_page из GET (по умолчанию 20)
     per_page = request.GET.get('per_page', 20)
@@ -36,6 +37,7 @@ def index(request):
         'per_page': per_page,
         'current_params': params_string,
     }
+    
     return render(request, 'core/index.html', context)
 
 
