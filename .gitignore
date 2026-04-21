@@ -2,10 +2,17 @@
 venv/
 env/
 .venv/
+.env
+.env.local
+.env.*.local
 
 # Кэш Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.sqlite3
 
 # База данных (если используете SQLite)
 db.sqlite3
@@ -19,3 +26,6 @@ settings.py
 staticfiles/
 static/
 media/
+
+# Дебаг файлы
+debug_*.html

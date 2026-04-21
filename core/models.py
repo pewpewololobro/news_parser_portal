@@ -7,6 +7,7 @@ class Channel(models.Model):
     link = models.TextField(verbose_name="Ссылка")
     short_title = models.CharField(max_length=32, default='', verbose_name="Короткий заголовок")
     html_desc = models.TextField(verbose_name="Описание в HTML")
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
 
     class Meta:
         db_table = 'channels'
