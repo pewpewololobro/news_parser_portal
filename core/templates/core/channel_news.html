@@ -4,7 +4,9 @@
 
 {% block content %}
 <div class="news-container">
-    <h2 class="news-title">Новости канала: {{ current_channel.title|default:current_channel.short_title }}</h2>
+    <a href="{{ current_channel.link}}">
+        <h2 class="news-title">Новости канала: {{ current_channel.title|default:current_channel.short_title }}</h2>
+    </a>
     <div class="news-grid">
         {% for item in news %}
             <div class="news-card">

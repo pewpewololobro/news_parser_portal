@@ -4,6 +4,7 @@
 <head>
     <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/pagination.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&display=swap" rel="stylesheet">
     <link rel="shortcut icon" type="image/png" href="">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>{% block title %}{% endblock title %}</title>
@@ -15,7 +16,7 @@
         </a>
         <h1 class="header_title">Абаканский городской портал</h1>
     </header>
-    <nav class="nav">
+    <!-- <nav class="nav">
         <ul class="nav_items">
             <li><a href="/">Все новости</a></li>
             <li><a href="https://xn--80aaac0ct.xn--p1ai/main/o-gorode.html">О городе</a></li>
@@ -41,9 +42,60 @@
                 <i class="fas fa-search"></i>
             </button>
         </form>
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch">
+                <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </nav> -->
+    <nav class="nav">
+        <button class="mobile-menu-btn" aria-label="Меню">☰</button>
+        <ul class="nav_items">
+            <li><a href="/">Все новости</a></li>
+            <li><a href="https://xn--80aaac0ct.xn--p1ai/main/o-gorode.html">О городе</a></li>
+            {% for group in groups %}
+                <li class="menu-item">
+                    <a href="{% url 'group_news' group.id %}">{{ group.name }}</a>
+                    <ul class="nav_sub_items">
+                        {% for group_channel in group.groupchannel_set.all %}
+                            <li>
+                                <a href="{% url 'channel_news' group_channel.channel.channel_id %}">
+                                    {{ group_channel.channel.short_title|default:group_channel.channel.title|truncatechars:30 }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+        
+        <div class="search-wrapper">
+            <form action="{% url 'search_news' %}" class="form-filter" method="GET">
+                <input type="text" name="q" id="filter_n" class="filter_news_header" 
+                    placeholder="Поиск по новостям" value="{{ search_query|default:'' }}">
+                <input type="date" name="date" id="filter_date" class="filter_news_date" 
+                    value="{{ search_date|default:'' }}">
+                <button type="submit" class="button search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+            
+            <!-- Кнопка сброса фильтров -->
+            <button class="reset-filters-btn" id="resetFiltersBtn" title="Сбросить все фильтры">
+                <i class="fas fa-undo-alt"></i>
+            </button>
+        </div>
+        
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch">
+                <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+        </div>
     </nav>
-
     <main>
+        
         {% block content %}
         {% endblock content %}
         
@@ -56,9 +108,92 @@
     </main>
     
     <footer class="footer">
-        ПОДВАЛ
-        {% block script %}
-        {% endblock script %}
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3 class="footer-title">Контакты</h3>
+                <div class="footer-contacts">
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div class="contact-info">
+                            <strong>Адрес:</strong>
+                            <span>ул. Щетинкина, 10, Абакан, Республика Хакасия, 655017</span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div class="contact-info">
+                            <strong>e-mail для корреспонденции:</strong>
+                            <a href="mailto:abakanadm@r-19.ru">abakanadm@r-19.ru</a>
+                            <span class="contact-note">(обращения граждан направляются исключительно через раздел "Обращения граждан")</span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-newspaper"></i>
+                        <div class="contact-info">
+                            <strong>e-mail для СМИ и для сообщений о технических сбоях на сайте:</strong>
+                            <a href="mailto:osmi@r-19.ru">osmi@r-19.ru</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div class="contact-info">
+                            <strong>По вопросам корреспонденции:</strong>
+                            <a href="tel:+73902224018">+7(3902)22-40-18</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-users"></i>
+                        <div class="contact-info">
+                            <strong>Обращения граждан:</strong>
+                            <a href="tel:+73902223574">+7(3902)22-35-74</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-microphone"></i>
+                        <div class="contact-info">
+                            <strong>Телефон для СМИ:</strong>
+                            <a href="tel:+73902224536">+7(3902)22-45-36</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-fax"></i>
+                        <div class="contact-info">
+                            <strong>Факс:</strong>
+                            <a href="tel:+73902221595">+7(3902)22-15-95</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3 class="footer-title">Мы в социальных сетях</h3>
+                <div class="social-links">
+                    <a href="https://vk.com/officialabakan" target="_blank" class="social-link vk" rel="noopener noreferrer">
+                        <i class="fab fa-vk"></i>
+                        <span>ВКонтакте</span>
+                    </a>
+                    <a href="https://ok.ru/officialabakan" target="_blank" class="social-link ok" rel="noopener noreferrer">
+                        <i class="fab fa-odnoklassniki"></i>
+                        <span>Одноклассники</span>
+                    </a>
+                    <a href="https://t.me/officialabakan" target="_blank" class="social-link telegram" rel="noopener noreferrer">
+                        <i class="fab fa-telegram-plane"></i>
+                        <span>Telegram</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; {% now "Y" %} Абаканский городской портал. Все права защищены.</p>
+        </div>
     </footer>
+    <script src="{% static 'core/js/script.js' %}"></script>
 </body>
 </html>
